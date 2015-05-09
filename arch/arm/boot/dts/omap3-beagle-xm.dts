@@ -407,7 +407,7 @@
 // ADCs
 &mcspi3 {
   pinctrl-names = "default";
-  pinctrl-0 = <&spi3_pins>;
+  pinctrl-0 = <&spi3_pins &adc_pins>;
   status = "okay";
   // Due to BeagleDAQ multiplexer
   ti,spi-num-cs = <4>;
@@ -447,6 +447,15 @@
       0x160 (PIN_OUTPUT | MUX_MODE1) /* mcbsp1_dx.mcspi4_simo gpio_158 (dac_spi_smio) */
       0x162 (PIN_INPUT_PULLUP | MUX_MODE1) /* mcbsp1_dr.mcspi4_somi gpio_159 (dac_spi_somi) */
       0x166 (PIN_OUTPUT | MUX_MODE4) /* mcbsp1_fsx.mcspi4_cs0 gpio_161 (dac_spi_cs) */
+    >;
+  };
+};
+
+&omap3_pmx_core {
+  adc_pins: pinmux_adc_pins {
+    pinctrl-single,pins = <
+	/* Start conversion pin */
+	0x146 (PIN_OUTPUT | MUX_MODE4) /* uart2_rts.gpio_145 */
     >;
   };
 };

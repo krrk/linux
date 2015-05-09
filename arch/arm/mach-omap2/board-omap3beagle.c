@@ -602,9 +602,6 @@ static int __init beagledaq_init(void)
 	gpio_request_one(BEAGLEDAQ_DAC_CS_MUX0, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC CS mux0");
 	gpio_request_one(BEAGLEDAQ_DAC_CS_MUX1, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC CS mux1");
 
-	// Start conversion pin
-	omap_mux_init_signal("uart2_rts.gpio_145", OMAP_PIN_OUTPUT);
-
 	ret = gpiochip_add(&adc_csmux_chip);
 	if (ret)
 		printk(KERN_ERR "Failed to register ADC mux: %d\n", ret);
