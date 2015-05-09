@@ -605,26 +605,6 @@ static int __init beagledaq_init(void)
 	// Start conversion pin
 	omap_mux_init_signal("uart2_rts.gpio_145", OMAP_PIN_OUTPUT);
 
-	/*
-	 * SPI pins
-	 * NOTE: Clock pins need to be in input mode for controller to register
-	 * input data
-	 */
-	// McSPI3 pinmux configuration (ADCs)
-	omap_mux_init_signal("sdmmc2_clk.mcspi3_clk", OMAP_PIN_INPUT);
-	omap_mux_init_signal("sdmmc2_cmd.mcspi3_simo", OMAP_PIN_OUTPUT);
-	omap_mux_init_signal("sdmmc2_dat0.mcspi3_somi", OMAP_PIN_INPUT_PULLUP);
-	omap_mux_init_signal("sdmmc2_dat3.gpio_135", OMAP_PIN_OUTPUT);
-	omap_mux_init_signal("sdmmc2_dat2.gpio_134", OMAP_PIN_OUTPUT);
-	omap_mux_init_signal("sdmmc2_dat1.gpio_133", OMAP_PIN_OUTPUT);
-	// McSPI4 pinmux configuration (DACs)
-	omap_mux_init_signal("mcbsp1_clkr.mcspi4_clk", OMAP_PIN_INPUT);
-	omap_mux_init_signal("mcbsp1_dx.mcspi4_simo", OMAP_PIN_OUTPUT);
-	omap_mux_init_signal("mcbsp1_dr.mcspi4_somi", OMAP_PIN_INPUT_PULLUP);
-	omap_mux_init_signal("mcbsp1_fsx.gpio_161", OMAP_PIN_OUTPUT);
-	omap_mux_init_signal("mcbsp1_fsr.gpio_157", OMAP_PIN_OUTPUT);
-	omap_mux_init_signal("mcbsp1_clkx.gpio_162", OMAP_PIN_OUTPUT);
-
 	ret = gpiochip_add(&adc_csmux_chip);
 	if (ret)
 		printk(KERN_ERR "Failed to register ADC mux: %d\n", ret);
