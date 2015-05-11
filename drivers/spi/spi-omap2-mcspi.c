@@ -138,6 +138,7 @@ struct omap2_mcspi {
 	struct omap2_mcspi_regs ctx;
 	int			fifo_depth;
 	unsigned int		pin_dir:1;
+	int                     *cs_gpios;
 };
 
 struct omap2_mcspi_cs {
@@ -245,6 +246,9 @@ static void omap2_mcspi_set_enable(const struct spi_device *spi, int enable)
 static void omap2_mcspi_force_cs(struct spi_device *spi, int cs_active)
 {
 	u32 l;
+	struct omap2_mcspi* mcspi = spi_master_get_devdata(spi->master);
+	if (mcspi->cs_gpios)
+		gpio_set_value(mcspi->cs_gpios[spi->chip_select], cs_active);
 
 	l = mcspi_cached_chconf0(spi);
 	if (cs_active)
@@ -1350,6 +1354,14 @@ static int omap2_mcspi_probe(struct platform_device *pdev)
 
 	mcspi = spi_master_get_devdata(master);
 	mcspi->master = master;
+
+	if (pconfig && pconfig->cs_gpios) {
+		mcspi->cs_gpios = pconfig->cs_gpios;
+		num_dma = 1;
+	} else {
+		mcspi->cs_gpios = NULL;
+		num_dma = master->num_chipselect;
+	}
 
 	match = of_match_device(omap_mcspi_of_match, &pdev->dev);
 	if (match) {

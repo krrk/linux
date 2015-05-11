@@ -510,6 +510,11 @@ static struct platform_device *omap3_beagle_devices[] __initdata = {
  *
  * Important: The chip select lines are active low.
  */
+static int csmux_get_direction(struct gpio_chip *chip, unsigned offset)
+{
+	return 0;
+}
+
 static int csmux_set_direction_input(struct gpio_chip *chip, unsigned offset)
 {
 	return -ENOSYS;
@@ -517,7 +522,7 @@ static int csmux_set_direction_input(struct gpio_chip *chip, unsigned offset)
 
 static int csmux_set_direction_output(struct gpio_chip *chip, unsigned offset, int value)
 {
-	return -ENOSYS;
+	return 0;
 }
 
 static int csmux_get(struct gpio_chip *chip, unsigned offset)
@@ -525,13 +530,13 @@ static int csmux_get(struct gpio_chip *chip, unsigned offset)
 	return -ENOSYS;
 }
 
-#define BEAGLEDAQ_CONVSTART	145
-#define BEAGLEDAQ_ADC_CS_EN	135
-#define BEAGLEDAQ_ADC_CS_MUX0	157
-#define BEAGLEDAQ_ADC_CS_MUX1	162
-#define BEAGLEDAQ_DAC_CS_EN	161
-#define BEAGLEDAQ_DAC_CS_MUX0	134
-#define BEAGLEDAQ_DAC_CS_MUX1	133
+#define BEAGLEDAQ_CONVSTART	113
+#define BEAGLEDAQ_ADC_CS_EN	103
+#define BEAGLEDAQ_ADC_CS_MUX0	125
+#define BEAGLEDAQ_ADC_CS_MUX1	130
+#define BEAGLEDAQ_DAC_CS_EN	129
+#define BEAGLEDAQ_DAC_CS_MUX0	102
+#define BEAGLEDAQ_DAC_CS_MUX1	101
 
 static struct ad7606_platform_data ad7606_pd[4] = {
 	{.gpio_convst = BEAGLEDAQ_CONVSTART},
@@ -562,6 +567,7 @@ static const char* adc_csmux_names[] = { "adc1", "adc2", "adc3", "adc4" };
 
 static struct gpio_chip adc_csmux_chip = {
 	.label = "BeagleDAQ ADC chip selects",
+	.get_direction = csmux_get_direction,
 	.direction_input = csmux_set_direction_input,
 	.get = csmux_get,
 	.direction_output = csmux_set_direction_output,
@@ -576,6 +582,7 @@ static const char* dac_csmux_names[] = { "dac1", "dac2", "dac3", "dac4" };
 static struct gpio_chip dac_csmux_chip = {
 	.label = "BeagleDAQ DAC chip selects",
 	.dev = NULL,
+	.get_direction = csmux_get_direction,
 	.direction_input = csmux_set_direction_input,
 	.get = csmux_get,
 	.direction_output = csmux_set_direction_output,
@@ -591,16 +598,30 @@ int mcspi4_cs_gpios[4];
 static int __init beagledaq_init(void)
 {
 	int i, ret;
+#define ERR_CHK(f) if ((ret = f) != 0) printk(KERN_ERR "Failed to register GPIO (line %d): %d\n", __LINE__, ret)
 
 	printk(KERN_INFO "BeagleDAQ (c) Ben Gamari 2011\n");
-	gpio_request_one(BEAGLEDAQ_CONVSTART, GPIOF_OUT_INIT_LOW, "BeagleDAQ conversion trigger");
-	gpio_export(BEAGLEDAQ_CONVSTART, false);
-	gpio_request_one(BEAGLEDAQ_ADC_CS_EN, GPIOF_OUT_INIT_LOW, "BeagleDAQ ADC master CS");
-	gpio_request_one(BEAGLEDAQ_ADC_CS_MUX0, GPIOF_OUT_INIT_LOW, "BeagleDAQ ADC CS mux0");
-	gpio_request_one(BEAGLEDAQ_ADC_CS_MUX1, GPIOF_OUT_INIT_LOW, "BeagleDAQ ADC CS mux1");
-	gpio_request_one(BEAGLEDAQ_DAC_CS_EN, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC master CS");
-	gpio_request_one(BEAGLEDAQ_DAC_CS_MUX0, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC CS mux0");
-	gpio_request_one(BEAGLEDAQ_DAC_CS_MUX1, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC CS mux1");
+	ERR_CHK(gpio_request_one(BEAGLEDAQ_CONVSTART, GPIOF_OUT_INIT_LOW, "BeagleDAQ conversion trigger"));
+	ERR_CHK(gpio_export(BEAGLEDAQ_CONVSTART, false));
+	omap_mux_init_gpio(BEAGLEDAQ_CONVSTART, OMAP_PIN_OUTPUT);
+
+	ERR_CHK(gpio_request_one(BEAGLEDAQ_ADC_CS_EN, GPIOF_OUT_INIT_LOW, "BeagleDAQ ADC master CS"));
+	omap_mux_init_gpio(BEAGLEDAQ_ADC_CS_EN, OMAP_PIN_OUTPUT);
+
+	ERR_CHK(gpio_request_one(BEAGLEDAQ_ADC_CS_MUX0, GPIOF_OUT_INIT_LOW, "BeagleDAQ ADC CS mux0"));
+	omap_mux_init_gpio(BEAGLEDAQ_ADC_CS_MUX0, OMAP_PIN_OUTPUT);
+
+	ERR_CHK(gpio_request_one(BEAGLEDAQ_ADC_CS_MUX1, GPIOF_OUT_INIT_LOW, "BeagleDAQ ADC CS mux1"));
+	omap_mux_init_gpio(BEAGLEDAQ_ADC_CS_MUX1, OMAP_PIN_OUTPUT);
+
+	ERR_CHK(gpio_request_one(BEAGLEDAQ_DAC_CS_EN, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC master CS"));
+	omap_mux_init_gpio(BEAGLEDAQ_DAC_CS_EN, OMAP_PIN_OUTPUT);
+
+	ERR_CHK(gpio_request_one(BEAGLEDAQ_DAC_CS_MUX0, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC CS mux0"));
+	omap_mux_init_gpio(BEAGLEDAQ_DAC_CS_MUX0, OMAP_PIN_OUTPUT);
+
+	ERR_CHK(gpio_request_one(BEAGLEDAQ_DAC_CS_MUX1, GPIOF_OUT_INIT_LOW, "BeagleDAQ DAC CS mux1"));
+	omap_mux_init_gpio(BEAGLEDAQ_DAC_CS_MUX1, OMAP_PIN_OUTPUT);
 
 	ret = gpiochip_add(&adc_csmux_chip);
 	if (ret)
@@ -731,3 +752,4 @@ MACHINE_START(OMAP3_BEAGLE, "OMAP3 Beagle Board")
 	.init_time	= omap3_secure_sync32k_timer_init,
 	.restart	= omap3xxx_restart,
 MACHINE_END
+
